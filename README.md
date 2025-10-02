@@ -1,217 +1,190 @@
-Protein Property Predictor (Toy) — Domino-first Demo
+# 🧬 Protein Property Predictor (Toy) — Domino-First Demo
 
-Classifies protein sequences as soluble or membrane-bound.
-Built to showcase the full Domino flow: Workspace → Dataset → Training Job → App (and later Endpoint).
+Classifies protein sequences as **soluble** or **membrane-bound**.  
+Designed to showcase the Domino flow: **Workspace → Dataset → Training Job → App** (and later **Endpoint**).
 
-📌 What’s here
+---
 
-Two predictors
+## 🚀 What’s inside
 
-Rule-based (no training): simple hydrophobicity heuristics
+- **Two predictors**
+  - **Rule-based** (no training): thresholds on hydrophobicity.
+  - **ML** (logistic regression): trained on a tiny toy CSV.
+- **Domino-friendly I/O** via `DATASET_DIR` (reads data, saves model).
+- **Simple UI**: Streamlit app publishable as a Domino App.
 
-ML (logistic regression): trained on tiny toy data
+---
 
-Domino-friendly storage: reads/writes under a mounted Dataset via DATASET_DIR
+## 🗂️ Repo structure
 
-Simple UI: Streamlit app you can publish as a Domino App
-
-🧠 Biology in 30 seconds
-
-Proteins are chains of 20 amino acids (letters A, C, D, …, Y).
-
-Inside/outside cells is watery; membranes are oily.
-
-Hydrophobic (“oily”) letters like A I L M F W V Y tend to favor membranes.
-
-Many membrane/secreted proteins start with a hydrophobic N-terminus (first ~20 aa).
-
-We compute:
-
-overall hydrophobic fraction
-
-N-terminal hydrophobic fraction
-
-sequence length
-…and predict membrane-bound vs soluble.
-
-📁 Repo layout
 property-property-model/
-├─ app.sh                                 # Domino App entry (MUST be in repo root)
+├─ app.sh # Domino App entry (MUST be at repo root)
 ├─ README.md
 └─ protein-property-predictor/
-   ├─ app.py                               # Streamlit UI
-   ├─ model.py                             # Prediction (rule + ML loader)
-   ├─ train.py                             # Training (logistic regression)
-   ├─ data/
-   │  └─ train.csv                         # Tiny toy set: id,sequence,label
-   ├─ env/
-   │  └─ requirements.txt                  # numpy, pandas, scikit-learn, joblib, streamlit, requests
-   └─ models/
-      └─ latest/                           # Trained model will be saved here (or in Dataset)
+├─ app.py # Streamlit UI
+├─ model.py # Prediction (rule + ML loader)
+├─ train.py # Training (logistic regression)
+├─ data/
+│ └─ train.csv # Tiny toy dataset: id,sequence,label
+├─ env/
+│ └─ requirements.txt # numpy, pandas, scikit-learn, joblib, streamlit, requests
+└─ models/
+└─ latest/ # Trained model is written here (or in Dataset)
 
-✅ Requirements
 
-Domino project connected to this Git repo
 
-A Domino Compute Environment with Python 3 + pip
+---
 
-(Optional) A Dataset mounted in the project (NetApp-backed recommended)
+## 🧪 Biology (60-second version)
 
-Python packages (already listed in env/requirements.txt):
+- Proteins are chains of 20 amino acids (letters **A, C, D, …, Y**).
+- Water is **hydrophilic**; cell membranes are **hydrophobic** (oily).
+- Hydrophobic letters **A I L M F W V Y** tend to favor membranes.
+- Many membrane/secreted proteins begin with a **hydrophobic N-terminus** (~first 20 aa).
+- We compute features:
+  1) **Overall hydrophobic fraction**, 2) **N-terminal hydrophobic fraction**, 3) **Length**  
+  → Predict **membrane-bound** vs **soluble**.
 
-numpy
-pandas
-scikit-learn
-joblib
-streamlit
-requests
+**Why care?** Membrane proteins (receptors, channels, pumps) are major drug targets and behave differently in experiments than soluble proteins.
 
-🚀 Quickstart on Domino
-1) Connect code & Dataset
+---
 
-Project → Code → use this GitHub repo (prefer “use latest from external repo”).
+## 📦 Requirements
 
-Data → Datasets → mount a Dataset.
-Note the mount path (example):
-/domino/datasets/local/protein-property-predictor
+- Domino project connected to this GitHub repo.
+- A Domino **Compute Environment** with Python 3 & `pip`.
+- (Recommended) a **Dataset** mounted in the project (NetApp-backed).
+- Python packages (already in `env/requirements.txt`):
 
-2) Workspace: set env + install deps
 
-Open a terminal in the repo root:
 
+---
+
+## 🧑‍💻 Quickstart on Domino
+
+### 1) Connect code & mount a Dataset
+1. **Project → Code** → add this Git repo (prefer “Use latest from external repo”).
+2. **Data → Datasets** → mount a Dataset (note its path, e.g.  
+ `/domino/datasets/local/protein-property-predictor`).
+
+### 2) Workspace: set env & install deps
+Open a terminal **at the repo root**:
+```bash
 # Tell code where to read/write data & models
-export DATASET_DIR=/domino/datasets/local/protein-property-predictor   # ← use your actual mount
+export DATASET_DIR=/domino/datasets/local/protein-property-predictor   # ← use your mount path
 
-# Install deps at user level
+# Install packages to user site
 pip3 install --user -r protein-property-predictor/env/requirements.txt
 export PATH="$HOME/.local/bin:$PATH"
 
-3) (Optional) copy toy training data into the Dataset
+
+# Protein Property Predictor — Quick Ops Runbook
+
+## 3) (Optional) Copy the toy data into the Dataset
+```bash
 mkdir -p "$DATASET_DIR/data" "$DATASET_DIR/models/latest"
 cp protein-property-predictor/data/train.csv "$DATASET_DIR/data/"
+```
 
-4) Train (writes a model.joblib)
+## 4) Train the model (writes `model.joblib`)
+```bash
 cd protein-property-predictor
 python3 train.py
 # → prints JSON with model_path, samples, etc.
+```
 
-5) Predict (CLI)
-# Force ML (uses model saved in ${DATASET_DIR} if set, else ./models/latest/)
+## 5) Predict from CLI
+**Force ML** (uses model saved in `${DATASET_DIR}` if set, else `./models/latest/`)
+```bash
 python3 model.py --seq "MKKLLLLLLLLLALALALAAAGAGA" --mode ml
+```
 
-# Force rule (no training needed)
+**Force rule** (no training needed)
+```bash
 python3 model.py --seq "MSTNPKPQRKTKRNTNRRPQDVK" --mode rule
+```
 
-# Auto: try ML, fallback to rule
+**Auto: try ML, fallback to rule**
+```bash
 python3 model.py --seq ">p\nMAALALLLGVVVVALAAA" --mode auto
+```
 
-▶️ Publish the Streamlit App (Domino Apps)
+---
 
-Files used:
+## 🖥️ Publish the Streamlit App (Domino Apps)
 
-app.sh (repo root, Domino App entry)
+### Files used
+- `app.sh` (repo root, Domino App entry script)
+- `protein-property-predictor/app.py` (Streamlit UI)
 
-protein-property-predictor/app.py (UI)
+### Steps
+1. **Deploy → Apps → New App**
+2. **Name:** `ppp-app`
+3. **Entry script:** `app.sh` *(must be at repo root)*
+4. **Compute environment:** any Python env with pip
+5. **Datasets:** mount the same Dataset used for training
+6. **Environment variables:**
+   ```bash
+   DATASET_DIR=/domino/datasets/local/protein-property-predictor   # adjust to your path
+   ```
+7. **Publish / Launch** → open the App URL.
 
-Steps:
+---
 
-Deploy → Apps → New App
+## 🧠 How it works
 
-Name: e.g., ppp-app
-Entry script: app.sh (must be exactly at repo root)
-Compute environment: any Python env with pip
-Datasets: mount the same Dataset you trained to
-Environment variables: add
-DATASET_DIR=/domino/datasets/local/protein-property-predictor (adjust to your mount)
+### `train.py`
+- Loads CSV from `${DATASET_DIR}/data/train.csv` (if set) or `./data/train.csv`.
+- Featurizes sequences (overall & N-terminal hydrophobicity, length).
+- Trains a `LogisticRegression`; saves to `${DATASET_DIR or ./}/models/latest/model.joblib`.
 
-Publish / Launch → open the URL.
+### `model.py`
+- **Rule mode:** simple thresholds on hydrophobicity features.
+- **ML mode:** loads `model.joblib` and returns probability + label.
+- **Auto mode:** try ML; if no model available, fallback to rule.
 
-🧪 Quickstart locally (optional)
-cd property-property-model/protein-property-predictor
-pip install -r env/requirements.txt
+### `app.py` (Streamlit)
+- Text area for sequence / tiny FASTA.
+- Mode selector (`auto` | `ml` | `rule`).
+- Calls `predict()` and renders JSON.
 
-# Train (saves to ./models/latest/model.joblib)
-python train.py
+---
 
-# Predict
-python model.py --seq "MKKLLLLLLLLLALALALAAAGAGA" --mode ml
+## 🧭 Troubleshooting
 
-# Run the app
-streamlit run app.py
-# open http://localhost:8501
+### App error: “entry script './app.sh' not found”
+- Ensure `app.sh` exists at **repo root** (top level in Project → Code).
+- In **Apps → Edit**, set **Entry script** exactly to `app.sh`.
 
-🛠 How it works (very briefly)
+### Blank Streamlit page
+- Check **App logs** in Domino.
+- Ensure `streamlit` is installed & on PATH (handled in `app.sh`).
+- Workspace health check:
+  ```bash
+  export DOMINO_APP_PORT=8501
+  streamlit run protein-property-predictor/app.py --server.port $DOMINO_APP_PORT --server.address 0.0.0.0 &
+  sleep 3
+  curl -s http://127.0.0.1:$DOMINO_APP_PORT/_stcore/health
+  ```
 
-train.py
+### ML mode: “model not found”
+- Run `python3 train.py` first.
+- Confirm printed `model_path` exists under `${DATASET_DIR}/models/latest/` (or `./models/latest/`).
 
-Reads data/train.csv (or ${DATASET_DIR}/data/train.csv if set)
+### Git push from Workspace fails
+- Configure identity:
+  ```bash
+  git config --global user.name "YOUR_GH_USERNAME"
+  git config --global user.email "you@company.com"
+  ```
+- Use a GitHub PAT; complete SAML SSO if prompted for org repos.
 
-Featurizes each sequence (overall hydrophobicity, N-terminal hydrophobicity, length)
+---
 
-Trains a LogisticRegression model
+## 🗺️ Roadmap (next steps)
+- Domino Endpoint that wraps `predict()` with request/response logging.
+- Jobs to schedule `train.py` and snapshot the Dataset.
+- MLflow logging of params/metrics/artifacts.
+- Tests for parsing/featurization & golden predictions.
+- Expand dataset; add metrics (confusion matrix, ROC/PR).
 
-Saves to ${DATASET_DIR or ./}/models/latest/model.joblib
-
-model.py
-
-Rule mode: threshold on hydrophobicity → label + confidence
-
-ML mode: loads model.joblib, outputs probability + label
-
-Auto: tries ML; if model missing, falls back to rule
-
-app.py (Streamlit)
-
-Text area to paste sequence / tiny FASTA
-
-Dropdown for mode (auto / ml / rule)
-
-Calls predict() and renders JSON
-
-🧭 Roadmap (next)
-
-Endpoint: wrap predict() as a Domino Endpoint with request/response logging
-
-Jobs: schedule train.py retraining, snapshot the Dataset
-
-MLflow: log params/metrics/artifacts for each training run
-
-Tests: unit tests for parsing/featurization & golden predictions
-
-Data: expand training set; add metrics (confusion matrix, ROC/PR)
-
-🧩 Troubleshooting
-
-App error “entry script './app.sh' not found”
-
-Ensure app.sh is at the repo root (visible in Project → Code top level)
-
-In Apps → Edit, set Entry script to app.sh (no ./, no subfolder)
-
-ML mode says model not found
-
-Run train.py first
-
-Verify the path printed in training output exists (under ${DATASET_DIR}/models/latest/ or ./models/latest/)
-
-Blank Streamlit page
-
-Check App logs
-
-Ensure streamlit is installed and on PATH (the app.sh does both)
-
-In a Workspace, sanity check:
-
-export DOMINO_APP_PORT=8501
-streamlit run protein-property-predictor/app.py --server.port $DOMINO_APP_PORT --server.address 0.0.0.0 &
-sleep 3
-curl -s http://127.0.0.1:$DOMINO_APP_PORT/_stcore/health
-
-
-Git push from Workspace fails
-
-git config --global user.name "YOUR_GH_USERNAME"
-
-git config --global user.email "you@company.com"
-
-Use a GitHub PAT; complete SAML SSO if prompted
