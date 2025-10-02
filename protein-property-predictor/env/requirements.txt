@@ -2,3 +2,5 @@ numpy
 pandas
 scikit-learn
 joblib
+streamlit        
+requests         # only if you’ll use endpoint_tester.py
