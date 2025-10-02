@@ -1,27 +1,27 @@
-cat > app.sh <<'SH'
 #!/bin/bash
 set -euo pipefail
 
-# Install deps at user level (no root)
-pip3 install --user --no-warn-script-location -r protein-property-predictor/env/requirements.txt streamlit
+# Ensure user-site bin (where pip --user installs streamlit) is on PATH
 export PATH="$HOME/.local/bin:$PATH"
 
-# Debug: show where we are and what's here
-echo "Repo root: $(pwd)"
-ls -la
+# Streamlit must bind to Domino's required host/port
+mkdir -p ~/.streamlit
+cat > ~/.streamlit/config.toml <<'EOF'
+[browser]
+gatherUsageStats = true
 
-# Domino injects this port; default to 8501 if not set
-: "${DOMINO_APP_PORT:=8501}"
+[server]
+port = 8888
+address = "0.0.0.0"
+enableCORS = false
+enableXsrfProtection = false
+EOF
 
-# Run Streamlit app
-exec streamlit run protein-property-predictor/app.py \
-  --server.port "$DOMINO_APP_PORT" \
-  --server.address 0.0.0.0 \
-  --server.enableCORS false \
-  --server.enableXsrfProtection false \
-  --browser.gatherUsageStats false
-SH
+# (Optional) Install deps at startup if not baked into the environment.
+# Comment these 2 lines out if you've baked them into the Compute Environment.
+#pip3 install --user -r protein-property-predictor/env/requirements.txt || true
+#hash -r
 
-# make it executable and committed
-chmod +x app.sh
-
+# Run the Streamlit app from the correct directory
+#cd protein-property-predictor
+#exec streamlit run app.py
