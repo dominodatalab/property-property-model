@@ -23,6 +23,7 @@ LATEST_DIR = os.path.join(MODELS_DIR, "latest")
 os.makedirs(LATEST_DIR, exist_ok=True)
 MODEL_PATH = os.path.join(LATEST_DIR, "model.joblib")
 
+
 # Simple features (match model.py)
 HYDRO = set("AILMFWVY")
 
