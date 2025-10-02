@@ -1,17 +1,19 @@
 cat > app.sh <<'SH'
-#!/usr/bin/env bash
+#!/bin/bash
 set -euo pipefail
 
-# Install deps to user site (keeps startup lightweight)
+# Install deps at user level (no root)
 pip3 install --user --no-warn-script-location -r protein-property-predictor/env/requirements.txt streamlit
-
-# Ensure user-installed binaries are on PATH
 export PATH="$HOME/.local/bin:$PATH"
 
-# Domino exposes a port env var when running as an App; default to 8501 if missing
+# Debug: show where we are and what's here
+echo "Repo root: $(pwd)"
+ls -la
+
+# Domino injects this port; default to 8501 if not set
 : "${DOMINO_APP_PORT:=8501}"
 
-# Launch Streamlit
+# Run Streamlit app
 exec streamlit run protein-property-predictor/app.py \
   --server.port "$DOMINO_APP_PORT" \
   --server.address 0.0.0.0 \
@@ -20,4 +22,6 @@ exec streamlit run protein-property-predictor/app.py \
   --browser.gatherUsageStats false
 SH
 
+# make it executable and committed
 chmod +x app.sh
+
