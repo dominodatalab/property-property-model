@@ -119,15 +119,26 @@ def predict(input_text: str, mode: str = "auto"):
     """
     mode: 'ml' → force ML, 'rule' → force rule, 'auto' → try ML then fallback to rule.
     """
-    if mode == "rule":
-        return predict_rule(input_text)
-    if mode == "ml":
-        return predict_ml(input_text)
-    # auto
     try:
-        return predict_ml(input_text)
-    except Exception:
-        return predict_rule(input_text)
+        if mode == "rule":
+            return predict_rule(input_text)
+        if mode == "ml":
+            return predict_ml(input_text)
+        # auto
+        try:
+            return predict_ml(input_text)
+        except Exception as e:
+            print(f"[auto fallback] ML failed: {e}")
+            return predict_rule(input_text)
+
+    except Exception as e:
+        # 🔥 This ensures Domino gets valid JSON even if something breaks
+        return {
+            "status": "error",
+            "message": str(e),
+            "mode": mode,
+        }
+
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="Protein Property Predictor (rule + ML)")
