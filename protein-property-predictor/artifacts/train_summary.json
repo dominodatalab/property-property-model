@@ -2,8 +2,8 @@
   "status": "ok",
   "samples": 6,
   "features_dim": 3,
-  "model_path": "/mnt/.domino/.persistence/directories/home/ubuntu/property-property-model/protein-property-predictor/models/latest/model.joblib",
-  "mlflow_tracking": "/mnt/.domino/.persistence/directories/home/ubuntu/property-property-model/protein-property-predictor/mlruns",
-  "mlflow_last_run_id": "7f676a7c65e14da1b86ed3959d7a00f2",
-  "timestamp": 1759432324
+  "model_path": "/mnt/code/protein-property-predictor/models/latest/model.joblib",
+  "mlflow_tracking": "/mnt/code/protein-property-predictor/mlruns",
+  "mlflow_last_run_id": null,
+  "timestamp": 1759976544
 }
