@@ -5,5 +5,5 @@
   "model_path": "/mnt/code/protein-property-predictor/models/latest/model.joblib",
   "mlflow_tracking": "/mnt/code/protein-property-predictor/mlruns",
   "mlflow_last_run_id": null,
-  "timestamp": 1759976544
+  "timestamp": 1760018205
 }

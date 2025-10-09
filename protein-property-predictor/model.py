@@ -23,6 +23,13 @@ from pathlib import Path
 import mlflow
 import mlflow.sklearn
 
+import mlflow
+import mlflow.sklearn
+
+# Ensure MLflow connects to Domino’s built-in experiment tracker
+mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "file:/mnt/code/protein-property-predictor/mlruns"))
+
+
 # --- Safe optional plotting ---
 try:
     import matplotlib.pyplot as plt
