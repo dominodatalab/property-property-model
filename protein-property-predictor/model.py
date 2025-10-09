@@ -115,29 +115,38 @@ def predict_ml(input_text: str):
     }
 
 # ---------- Unified entry ----------
-def predict(input_text: str, mode: str = "auto"):
+def predict(data: dict):
     """
-    mode: 'ml' → force ML, 'rule' → force rule, 'auto' → try ML then fallback to rule.
+    Expected input JSON:
+      {
+        "seq": "MKKLLLLLLLLLALALALAAAGAGA",
+        "mode": "auto"
+      }
+
+    Domino passes the full request body as a single dict, so we unpack it here.
     """
     try:
+        seq = data.get("seq", "")
+        mode = data.get("mode", "auto")
+
         if mode == "rule":
-            return predict_rule(input_text)
+            return predict_rule(seq)
         if mode == "ml":
-            return predict_ml(input_text)
-        # auto
+            return predict_ml(seq)
+
+        # auto: try ML first, fallback to rule
         try:
-            return predict_ml(input_text)
+            return predict_ml(seq)
         except Exception as e:
             print(f"[auto fallback] ML failed: {e}")
-            return predict_rule(input_text)
+            return predict_rule(seq)
 
     except Exception as e:
-        # 🔥 This ensures Domino gets valid JSON even if something breaks
         return {
             "status": "error",
             "message": str(e),
-            "mode": mode,
         }
+
 
 
 if __name__ == "__main__":
