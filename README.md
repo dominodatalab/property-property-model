@@ -1,4 +1,4 @@
-# 🧬 Protein Property Predictor (Toy) — Domino Demo by Luis Chan
+# 🧬 Protein Property Predictor (Toy Model) — Domino Demo by Luis Chan
 
 Classifies protein sequences as **soluble** or **membrane-bound**.  
 Designed to showcase the Domino flow: **Workspace → Dataset → Training Job → App** (and later **Endpoint**).
