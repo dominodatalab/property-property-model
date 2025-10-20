@@ -68,6 +68,36 @@ with mlflow.start_run(run_name="Training_Run") as run:
     mlflow.log_metric("train_accuracy", acc)
     mlflow.log_metric("train_auc", auc)
 
+
+     # ==========================================================
+    # 5b️⃣ Plot Hydrophobicity Distribution
+    # ==========================================================
+    import matplotlib.pyplot as plt
+
+    # Compute hydrophobic fractions for visualization
+    hydrophobic_values = [
+        sum(aa in "AILMFWYV" for aa in seq) / len(seq)
+        for seq in df["sequence"]
+    ]
+
+    plt.figure(figsize=(6, 4))
+    plt.hist(hydrophobic_values, bins=15, color="skyblue", edgecolor="black")
+    plt.xlabel("Hydrophobic Fraction")
+    plt.ylabel("Count")
+    plt.title("Hydrophobicity Distribution (Training Data)")
+    plt.tight_layout()
+
+    # Save figure to Domino artifacts directory
+    plot_path = "/mnt/artifacts/hydrophobicity_hist.png"
+    plt.savefig(plot_path)
+    plt.close()
+
+    # Log plot to MLflow as an artifact
+    mlflow.log_artifact(plot_path, artifact_path="plots")
+
+    print(f"✅ Hydrophobicity plot saved to {plot_path}")
+
+
     # ==========================================================
     # 6️⃣ Save Model + Log Artifacts
     # ==========================================================
