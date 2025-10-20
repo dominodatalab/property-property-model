@@ -90,7 +90,7 @@ python3 train.py
 ```
 
 ## 5) Predict from CLI
-**Force ML** (uses model saved in `${DATASET_DIR}` if set, else `./models/latest/`)
+**Force ML** (uses model saved in `/mnt/netapp-volumes/snapshots/ppp-volume/2/train.csv`)
 ```bash
 python3 model.py --seq "MKKLLLLLLLLLALALALAAAGAGA" --mode ml
 ```
