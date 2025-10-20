@@ -1,8 +1,8 @@
 # 🧬 Protein Property Predictor (Toy Model) — Domino Demo by Luis Chan
 
 Classifies protein sequences as **soluble** or **membrane-bound**.  
-Designed to showcase the Domino flow: **Workspace → Dataset → Training Job → App** (and later **Endpoint**).
-
+Designed to showcase the Domino flow using a **NetApp Volume Snapshot** for data:  
+**Workspace → NetApp Volume Snapshot → Training Job → App (and later Endpoint).**
 ---
 
 ## 🚀 What’s inside
@@ -10,7 +10,9 @@ Designed to showcase the Domino flow: **Workspace → Dataset → Training Job �
 - **Two predictors**
   - **Rule-based** (no training): thresholds on hydrophobicity.
   - **ML** (logistic regression): trained on a tiny toy CSV.
-- **Domino-friendly I/O** via `DATASET_DIR` (reads data, saves model).
+- **NetApp Volume–based I/O**  
+  Reads training data directly from `/mnt/netapp-volumes/snapshots/ppp-volume/2/train.csv`  
+  and saves model artifacts to `/mnt/artifacts`.
 - **Simple UI**: Streamlit app publishable as a Domino App.
 
 ---
@@ -25,13 +27,14 @@ property-property-model/
 ├─ model.py # Prediction (rule + ML loader)
 ├─ train.py # Training (logistic regression)
 ├─ data/
-│ └─ train.csv # Tiny toy dataset: id,sequence,label
+│ └─ train.csv # just for backup
 ├─ env/
 │ └─ requirements.txt # numpy, pandas, scikit-learn, joblib, streamlit, requests
 └─ models/
 └─ latest/ # Trained model is written here (or in Dataset)
 
-
+📁 **Training data** is located in the mounted NetApp volume:  
+`/mnt/netapp-volumes/snapshots/ppp-volume/2/train.csv`
 
 ---
 
@@ -53,7 +56,7 @@ property-property-model/
 
 - Domino project connected to this GitHub repo.
 - A Domino **Compute Environment** with Python 3 & `pip`.
-- (Recommended) a **Dataset** mounted in the project (NetApp-backed).
+- **NetApp Volume Snapshot** mounted at: `/mnt/netapp-volumes/snapshots/ppp-volume/2/train.csv`  
 - Python packages (already in `env/requirements.txt`):
 
 
@@ -64,14 +67,11 @@ property-property-model/
 
 ### 1) Connect code & mount a Dataset
 1. **Project → Code** → add this Git repo (prefer “Use latest from external repo”).
-2. **Data → Datasets** → mount a Dataset (note its path, e.g.  
- `/domino/datasets/local/protein-property-predictor`).
+2. **NetApp Volume Snapshot** mounted at: `/mnt/netapp-volumes/snapshots/ppp-volume/2/train.csv`  
 
 ### 2) Workspace: set env & install deps
 Open a terminal **at the repo root**:
 ```bash
-# Tell code where to read/write data & models
-export DATASET_DIR=/domino/datasets/local/protein-property-predictor   # ← use your mount path
 
 # Install packages to user site
 pip3 install --user -r protein-property-predictor/env/requirements.txt
@@ -80,11 +80,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 # Protein Property Predictor — Quick Ops Runbook
 
-## 3) (Optional) Copy the toy data into the Dataset
-```bash
-mkdir -p "$DATASET_DIR/data" "$DATASET_DIR/models/latest"
-cp protein-property-predictor/data/train.csv "$DATASET_DIR/data/"
-```
+## 3) **NetApp Volume Snapshot** mounted at: `/mnt/netapp-volumes/snapshots/ppp-volume/2/train.csv`  
 
 ## 4) Train the model (writes `model.joblib`)
 ```bash
@@ -122,7 +118,7 @@ python3 model.py --seq ">p\nMAALALLLGVVVVALAAA" --mode auto
 2. **Name:** `ppp-app`
 3. **Entry script:** `app.sh` *(must be at repo root)*
 4. **Compute environment:** any Python env with pip
-5. **Datasets:** mount the same Dataset used for training
+5. **Datasets:** mount the same Dataset snapshot used for training
 6. **Environment variables:**
    ```bash
    DATASET_DIR=/domino/datasets/local/protein-property-predictor   # adjust to your path
@@ -134,7 +130,7 @@ python3 model.py --seq ">p\nMAALALLLGVVVVALAAA" --mode auto
 ## 🧠 How it works
 
 ### `train.py`
-- Loads CSV from `${DATASET_DIR}/data/train.csv` (if set) or `./data/train.csv`.
+- Loads CSV from **NetApp Volume Snapshot** mounted at: `/mnt/netapp-volumes/snapshots/ppp-volume/2/train.csv`  
 - Featurizes sequences (overall & N-terminal hydrophobicity, length).
 - Trains a `LogisticRegression`; saves to `${DATASET_DIR or ./}/models/latest/model.joblib`.
 
@@ -182,9 +178,9 @@ python3 model.py --seq ">p\nMAALALLLGVVVVALAAA" --mode auto
 ---
 
 ## 🗺️ Roadmap (next steps)
-- Domino Endpoint that wraps `predict()` with request/response logging.
-- Jobs to schedule `train.py` and snapshot the Dataset.
-- MLflow logging of params/metrics/artifacts.
+- Domino Endpoint that wraps `predict()` with request/response logging.(completed✅)
+- Jobs to schedule `train.py` and snapshot the Dataset.(completed✅)
+- MLflow logging of params/metrics/artifacts.(completed✅)
 - Tests for parsing/featurization & golden predictions.
 - Expand dataset; add metrics (confusion matrix, ROC/PR).
 
