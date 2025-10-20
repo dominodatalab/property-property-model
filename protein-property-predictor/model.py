@@ -32,10 +32,10 @@ def featurize(seq):
 # ---------- Resolve model path ----------
 DATASET_DIR = os.getenv("DATASET_DIR", "").strip()
 HERE = os.path.dirname(__file__)
-if DATASET_DIR:
-    MODEL_PATH = os.path.join(DATASET_DIR, "models", "latest", "model.joblib")
-else:
-    MODEL_PATH = os.path.join(HERE, "models", "latest", "model.joblib")
+
+
+MODEL_PATH = "/mnt/artifacts/models/latest/model.joblib"
+
 
 # ---------- Load trained model ----------
 if not os.path.exists(MODEL_PATH):

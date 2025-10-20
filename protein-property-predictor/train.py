@@ -32,8 +32,8 @@ with mlflow.start_run(run_name="Training_Run") as run:
     # ==========================================================
     # 3️⃣ Load Data
     # ==========================================================
-    dataset_dir = os.getenv("DATASET_DIR", "./data")
-    data_path = os.path.join(dataset_dir, "train.csv")
+    data_path = "/mnt/netapp-volumes/snapshots/ppp-volume/2/train.csv"
+
 
     if not os.path.exists(data_path):
         raise FileNotFoundError(f"❌ Training data not found at: {data_path}")
@@ -71,21 +71,26 @@ with mlflow.start_run(run_name="Training_Run") as run:
     # ==========================================================
     # 6️⃣ Save Model + Log Artifacts
     # ==========================================================
-    model_dir = os.path.join(dataset_dir, "models/latest")
+    model_dir = "/mnt/artifacts/models/latest"
     os.makedirs(model_dir, exist_ok=True)
+
     model_path = os.path.join(model_dir, "model.joblib")
     joblib.dump(model, model_path)
 
-    # Log model file
-    mlflow.log_artifact(model_path, artifact_path="model")
-
-    # Log summary file
+    # Create summary JSON
     summary = {
         "train_accuracy": acc,
         "train_auc": auc,
         "model_path": model_path
     }
-    mlflow.log_text(json.dumps(summary, indent=2), "run_summary.json")
+    summary_path = os.path.join("/mnt/artifacts", "run_summary.json")
+    with open(summary_path, "w") as f:
+        json.dump(summary, f, indent=2)
+
+    # Log both artifacts to MLflow
+    mlflow.log_artifact(model_path, artifact_path="model")
+    mlflow.log_artifact(summary_path, artifact_path="summary")
 
     print(json.dumps(summary, indent=2))
+    print(f"✅ Model and summary saved to /mnt/artifacts")
     print(f"✅ Run logged to MLflow with run_id={run.info.run_id}")
